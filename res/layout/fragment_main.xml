@@ -1,0 +1,48 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/lin"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#b7ecfb" >
+
+    <LinearLayout
+        android:id="@+id/lin_vert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/bREC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/ButtonREC"
+            android:background="@drawable/button_selector" />
+
+        <Button
+            android:id="@+id/bPlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/ButtonPlay" 
+            android:background="@drawable/button_selector"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/relLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Chronometer
+            android:id="@+id/chrono"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:textSize="@dimen/chronoSize"
+            android:textColor="#ffffff" />
+
+    </RelativeLayout>
+
+</LinearLayout>
