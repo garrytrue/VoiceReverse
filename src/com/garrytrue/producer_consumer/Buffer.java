@@ -1,4 +1,4 @@
-package com.garrytrue.audiocapture;
+package com.garrytrue.producer_consumer;
 
 public class Buffer {
 	public short[] buffer;

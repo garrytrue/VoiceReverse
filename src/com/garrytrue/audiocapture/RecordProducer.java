@@ -1,61 +1,53 @@
 package com.garrytrue.audiocapture;
 
-import java.util.concurrent.BlockingQueue;
-
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
 
-public class RecordProducer extends BaseProducer implements Runnable {
-	private AudioRecord _recorder;
-	private volatile boolean stop;
-	
-	public RecordProducer(BlockingQueue<Buffer> output) {
-		super(output, AudioRecord.getMinBufferSize(
-				AudioSettings.SAMPLE_RATE,
-				AudioSettings.CHANNEL_CONFIG_AR,
-				AudioSettings.AUDIO_FORMAT));
-		stop = false;
+import com.garrytrue.producer_consumer.Buffer;
+import com.garrytrue.producer_consumer.IProducer;
 
-		_recorder = new AudioRecord(
-				MediaRecorder.AudioSource.MIC,
-				AudioSettings.SAMPLE_RATE,
-				AudioSettings.CHANNEL_CONFIG_AR,
-				AudioSettings.AUDIO_FORMAT,
-				_bufferSize);
-		_recorder.startRecording();
+public class RecordProducer implements IProducer {
+	private final static String TAG = "RecorderProducer";
+	private AudioRecord mRecorder;
+
+	public RecordProducer() {
+		// get Min Buffer Size
+		int minBuffer = AudioRecord.getMinBufferSize(AudioSettings.SAMPLE_RATE,
+				AudioSettings.CHANNEL_CONFIG_AR, AudioSettings.AUDIO_FORMAT);
+
+		// Initial AudioRecorder
+		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+				AudioSettings.SAMPLE_RATE, AudioSettings.CHANNEL_CONFIG_AR,
+				AudioSettings.AUDIO_FORMAT, minBuffer);
+
 	}
-	
-	protected void doStop() {
-		stop = true;
-	}
-	
-	protected boolean produce(Buffer b) {
-		b.size = 0;
-		if (stop) {
-			return false;
-		}
-//		_recorder.getState();
-//		_recorder.getRecordingState();
 
-		
-		//Log.i("Recorder", "RecordingState: " + _recorder.getRecordingState());
-		int bytesRead = _recorder.read(b.buffer, 0, b.buffer.length);
-		if (stop) {
+	@Override
+	public void onStart() {
+		Log.i(TAG, "Recorder state must be 1 is " + mRecorder.getState());
+		mRecorder.startRecording();
+		Log.i(TAG,
+				"Recording state mist be 3 is " + mRecorder.getRecordingState());
+
+	}
+
+	@Override
+	public boolean produce(Buffer b) {
+		int recData = mRecorder.read(b.buffer, 0, b.buffer.length);
+		if (recData == AudioRecord.ERROR_INVALID_OPERATION
+				|| recData == AudioRecord.ERROR_BAD_VALUE) {
 			return false;
 		}
-		if (bytesRead == AudioRecord.ERROR_INVALID_OPERATION
-				|| bytesRead == AudioRecord.ERROR_BAD_VALUE) {
-			b.last = true;
-			return false;
-		}
-		b.size = bytesRead;
-		b.last = false;
+		b.size = recData;
 		return true;
 	}
 
-	protected void onStop() {
-		_recorder.stop();
-		_recorder.release();
+	@Override
+	public void onStop() {
+		mRecorder.stop();
+		mRecorder.release();
+		mRecorder = null;
 	}
 
 }

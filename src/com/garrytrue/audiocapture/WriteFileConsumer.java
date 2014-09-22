@@ -4,14 +4,13 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
 
-public class WriteFileConsumer extends DataOutputStreamConsumer {
+import com.garrytrue.producer_consumer.IConsumer;
 
-	public WriteFileConsumer(String fileName,
-			BlockingQueue<Buffer> input) throws FileNotFoundException {
-		super(createDataOutputStream(fileName),input);
+public class WriteFileConsumer extends DataOutputStreamConsumer implements IConsumer{
+
+	public WriteFileConsumer(String fileName) throws FileNotFoundException {
+		super(createDataOutputStream(fileName));
 	}
 	
 	public static DataOutputStream createDataOutputStream(

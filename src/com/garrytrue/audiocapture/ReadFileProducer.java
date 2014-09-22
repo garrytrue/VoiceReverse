@@ -1,52 +1,60 @@
 package com.garrytrue.audiocapture;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.BlockingQueue;
 
 import android.util.Log;
 
-public class ReadFileProducer extends BaseProducer implements Runnable {
-	private static String TAG = "ReadFileProducer";
-	private InputStream _input;
+import com.garrytrue.producer_consumer.Buffer;
+import com.garrytrue.producer_consumer.IProducer;
 
-	public ReadFileProducer(
-			InputStream input,
-			BlockingQueue<Buffer> output,
-			int bufferSize) {
-		super(output, bufferSize);
-		_input = input;
+public class ReadFileProducer implements IProducer {
+	private final static String TAG = "ReaderFileProducer";
+	private String mFileName;
+	private DataInputStream mInput;
+
+	public ReadFileProducer(String fileName) {
+		mFileName = fileName;
 	}
 
-	protected void doStop() {
-	}
-	
-	protected void onStop() {
+	@Override
+	public void onStart() {
 		try {
-			_input.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			mInput = new DataInputStream(new BufferedInputStream(
+					new FileInputStream(mFileName)));
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			Log.e(TAG, "File not found", e);
 		}
 	}
 
-	protected boolean produce(Buffer b) {
-		b.size = 0;
+	@Override
+	public boolean produce(Buffer b) {
+		Log.i(TAG, "Start ReadFile");
 		try {
-
-			DataInputStream dis = new DataInputStream(_input);
-			//Log.i(TAG, "start read");
-
-			while (dis.available() > 0 && b.size < b.buffer.length) {
-				b.buffer[b.size] = dis.readShort();
-				b.size++;
-			}
-			b.last = !(0 < dis.available());
-			return dis.available() > 0;
-		} catch (IOException e) {
-			b.last = true;
+			Log.i(TAG, "Buffer lenght "+ b.buffer.length);
+			for (int i = 0; 0 < mInput.available() && i < b.buffer.length; i++) {
+				b.buffer[i] = mInput.readShort();
+				b.size = i + 1;
+				}
+			return (0 < mInput.available());
+		} catch (IOException ex) {
+			Log.e(TAG, "IOException", ex);
 			return false;
 		}
+	}
+
+	@Override
+	public void onStop() {
+		try {
+			mInput.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			Log.e(TAG, "Can not close stream ", e);
+		}
+
 	}
 }

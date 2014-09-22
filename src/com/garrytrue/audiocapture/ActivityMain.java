@@ -2,9 +2,7 @@ package com.garrytrue.audiocapture;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -112,22 +110,16 @@ public class ActivityMain extends ActionBarActivity {
 			OnClickListener {
 
 		private static final String TAG = "MainFragment";
-		// 44100Hz is currently the only rate that is guaranteed to work on all
-		// devices
-		// Patch name
 		private static final String PATCH_NAME = "Records";
 		// Time stamp 10 sec
-		private static final long RECORD_TIME = 2 * 1000;
+		private static final long RECORD_TIME = 10 * 1000;
 
 		private Button mbPlay, mbRec;
 		private boolean isRecording = true;
 		private Chronometer mChronometer;
 		private MHandler mHandler = null;
-
-		RecordProducer _recorder;
-		WriteFileConsumer _writer;
-		ReadFileProducer _reader;
-		PlayConsumer _player;
+		private Recorder mRecorder;
+		private ReversPlay mReversPlay;
 
 		public MainFragment() {
 
@@ -136,10 +128,6 @@ public class ActivityMain extends ActionBarActivity {
 		public void onCreate(Bundle saved) {
 			super.onCreate(saved);
 			Log.i(TAG, "onCreate");
-		}
-
-		public void onDestroy() {
-			super.onDestroy();
 		}
 
 		public void onActivityCreated(Bundle savedInstanceState) {
@@ -170,34 +158,27 @@ public class ActivityMain extends ActionBarActivity {
 
 		private void startRecording() {
 			try {
-				ArrayBlockingQueue<Buffer> q = new ArrayBlockingQueue<Buffer>(
-						10);
-				_recorder = new RecordProducer(q);
-				_writer = new WriteFileConsumer(getFileName(), q);
-				_recorder.start();
-				_writer.start();
-				mHandler.sendEmptyMessage(ActivityMain.BUTTON_REC_IS_DISSABLED);
+				mRecorder = new Recorder(getFileName());
 
+				mRecorder.start();
+				mHandler.sendEmptyMessage(ActivityMain.BUTTON_REC_IS_DISSABLED);
 				mHandler.postDelayed(new Runnable() {
 
 					@Override
 					public void run() {
 						stopRecording();
 					}
-
 				}, RECORD_TIME);
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
 			}
 		}
 
 		private void stopRecording() {
 			try {
 				Log.i(TAG, "stopRecording");
-				_recorder.stop();
+				mRecorder.stop();
 				Log.i(TAG, "_recorder stopped");
-				_writer.stop();
-				Log.i(TAG, "_writer stopped");
 				mHandler.sendEmptyMessage(ActivityMain.BUTTON_REC_IS_ENABLED);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -220,14 +201,7 @@ public class ActivityMain extends ActionBarActivity {
 				break;
 			case R.id.bPlay:
 				Log.i(TAG, "play pressed");
-				new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						playAudio();
-					}
-				}).start();
+				playAudio();
 				break;
 			default:
 				break;
@@ -242,25 +216,8 @@ public class ActivityMain extends ActionBarActivity {
 		}
 
 		private void playAudio() {
-			try {
-				ArrayBlockingQueue<Buffer> channel = new ArrayBlockingQueue<Buffer>(
-						10);
-				PlayConsumer player = new PlayConsumer(channel);
-				// ReadFileProducer reader = new ReadFileProducer(is, channel,
-				// minBufferAudioTrack);
-				ReverseReader reader = new ReverseReader(getFileName(), channel);
-
-				player.start();
-				reader.start();
-
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} // FileNotFound
-			catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			mReversPlay = new ReversPlay(getFileName());
+			mReversPlay.start();
 		}
 	}
 }

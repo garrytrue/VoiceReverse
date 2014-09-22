@@ -2,35 +2,44 @@ package com.garrytrue.audiocapture;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
 
-public class DataOutputStreamConsumer extends BaseConsumer implements Runnable {
+import com.garrytrue.producer_consumer.Buffer;
+import com.garrytrue.producer_consumer.IConsumer;
 
-	private DataOutputStream _output;
+public class DataOutputStreamConsumer implements IConsumer {
+	private DataOutputStream dataOutStream;
 
-	public DataOutputStreamConsumer(DataOutputStream output,
-			BlockingQueue<Buffer> input) {
-		super(input);
-		_output = output;
+	public DataOutputStreamConsumer(DataOutputStream dataStream) {
+		dataOutStream = dataStream;
 	}
 
-	protected void onStop() {
+	@Override
+	public void onStart() {
+	}
+
+	@Override
+	public boolean consume(Buffer b) {
+		// TODO Auto-generated method stub
 		try {
-			_output.close();
+			for (int i = 0; i < b.size; i++) {
+				dataOutStream.writeShort(b.buffer[i]);
+			}
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+
+	}
+
+	@Override
+	public void onStop() {
+		// TODO Auto-generated method stub
+		try {
+			dataOutStream.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	boolean consume(Buffer b) {
-		try {
-			for (int i = 0; i < b.size; i++) {
-				_output.writeShort(b.buffer[i]);
-			}
-			return !b.last;
-		} catch (IOException e) {
-			return false;
-		}
-	}
+
 }

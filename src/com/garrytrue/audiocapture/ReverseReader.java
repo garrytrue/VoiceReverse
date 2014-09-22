@@ -3,27 +3,38 @@ package com.garrytrue.audiocapture;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.concurrent.BlockingQueue;
 
 import android.util.Log;
 
-public class ReverseReader extends BaseProducer implements Runnable {
-	private static String TAG = "ReverseReader";
+import com.garrytrue.producer_consumer.Buffer;
+import com.garrytrue.producer_consumer.IProducer;
 
-	RandomAccessFile _file;
-	byte[] _buffer;
-	long _fileSize;
-	long _pos;
+public class ReverseReader implements IProducer {
+	private final static String TAG = "ReverseReader";
+	private String mFileName;
+	private RandomAccessFile mFile;
+	private byte[] mInternalBuff;
+	private long mCurPos;
 
-	public ReverseReader(String fileName, BlockingQueue<Buffer> output)
-			throws IOException {
-		super(output, 1024 * 20);
-		_file = new RandomAccessFile(fileName, "r");
-		_fileSize = _file.length();
-		_pos = _fileSize;
+	public ReverseReader(String name) {
+		mFileName = name;
+
+	}
+
+	@Override
+	public void onStart() {
+		try {
+			mFile = new RandomAccessFile(mFileName, "r");
+			mCurPos = mFile.length();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			Log.e(TAG, "File not found", e);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			Log.e(TAG, "Can't get file size", e1);
+		}
 	}
 
 	public static void reverse(short[] array) {
@@ -42,50 +53,52 @@ public class ReverseReader extends BaseProducer implements Runnable {
 		}
 	}
 
-	protected boolean produce(Buffer b) {
+	@Override
+	public boolean produce(Buffer b) {
 		try {
-			if (_buffer == null || _buffer.length != b.buffer.length * 2) {
-				_buffer = new byte[b.buffer.length * 2];
-			}
-
-			Log.i(TAG, "fp=" + _file.getFilePointer());
-
+			lazyInitInternalBuffer(b);
+			Log.i(TAG, "fp=" + mFile.getFilePointer());
 			int byteCount;
-			if (_buffer.length <= _pos) {
-				byteCount = _buffer.length;
+			if (mInternalBuff.length <= mCurPos) {
+				byteCount = mInternalBuff.length;
 			} else {
-				byteCount = (int) _pos;
+				byteCount = (int) mCurPos;
 			}
-			_pos -= byteCount;
-			Log.i(TAG, "read block: [" + _pos + ", " + byteCount + ")");
-			_file.seek(_pos);
-			_file.readFully(_buffer, 0, byteCount);
-
-			ByteBuffer.wrap(_buffer).order(ByteOrder.BIG_ENDIAN)
-					.asShortBuffer().get(b.buffer);
+			mCurPos -= byteCount;
+			Log.i(TAG, "read block: [" + mCurPos + ", " + byteCount + ")");
+			mFile.seek(mCurPos);
+			mFile.readFully(mInternalBuff, 0, byteCount);
+			byteToShort(b);
 			reverse(b.buffer);
 			b.size = byteCount / 2;
-			b.last = (_pos == 0);
-
-			return _pos != 0;
+			return mCurPos != 0;
 		} catch (IOException e) {
 			Log.e(TAG, e.toString());
 			return false;
 		}
 	}
 
-	@Override
-	protected void doStop() {
-		// TODO Auto-generated method stub
-
+	private void byteToShort(Buffer b) {
+		ByteBuffer.wrap(mInternalBuff).order(ByteOrder.BIG_ENDIAN)
+				.asShortBuffer().get(b.buffer);
 	}
-	
-	protected void onStop() {
-		try {
-			_file.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+	private void lazyInitInternalBuffer(Buffer b) {
+		if (mInternalBuff == null
+				|| mInternalBuff.length != b.buffer.length * 2) {
+			mInternalBuff = new byte[b.buffer.length * 2];
 		}
 	}
+
+	@Override
+	public void onStop() {
+		try {
+			mFile.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			Log.e(TAG, "Problem with close", e);
+		}
+
+	}
+
 }
