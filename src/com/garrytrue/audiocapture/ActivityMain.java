@@ -112,14 +112,16 @@ public class ActivityMain extends ActionBarActivity {
 		private static final String TAG = "MainFragment";
 		private static final String PATCH_NAME = "Records";
 		// Time stamp 10 sec
-		private static final long RECORD_TIME = 10 * 1000;
+		private static final long RECORD_TIME = 1 * 1000;
 
 		private Button mbPlay, mbRec;
 		private boolean isRecording = true;
 		private Chronometer mChronometer;
 		private MHandler mHandler = null;
-		private Recorder mRecorder;
-		private ReversPlay mReversPlay;
+		private Recorder mRecorder;// change to RecorderMultiply
+		private RecorderMultiply mRecorderMultiply;
+		private ReversPlay mReversPlay;// change to Player
+		private Player mPlayer;
 
 		public MainFragment() {
 
@@ -158,9 +160,11 @@ public class ActivityMain extends ActionBarActivity {
 
 		private void startRecording() {
 			try {
-				mRecorder = new Recorder(getFileName());
+				// mRecorder = new Recorder(getFileName());
+				mRecorderMultiply = new RecorderMultiply(getFileName());
+				mRecorderMultiply.start();
 
-				mRecorder.start();
+				// mRecorder.start();
 				mHandler.sendEmptyMessage(ActivityMain.BUTTON_REC_IS_DISSABLED);
 				mHandler.postDelayed(new Runnable() {
 
@@ -175,14 +179,15 @@ public class ActivityMain extends ActionBarActivity {
 		}
 
 		private void stopRecording() {
+			Log.i(TAG, "stopRecording");
+			// mRecorder.stop();
 			try {
-				Log.i(TAG, "stopRecording");
-				mRecorder.stop();
-				Log.i(TAG, "_recorder stopped");
-				mHandler.sendEmptyMessage(ActivityMain.BUTTON_REC_IS_ENABLED);
+				mRecorderMultiply.stop();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			Log.i(TAG, "_recorder stopped");
+			mHandler.sendEmptyMessage(ActivityMain.BUTTON_REC_IS_ENABLED);
 		}
 
 		// Realize Buttons Click
@@ -216,8 +221,10 @@ public class ActivityMain extends ActionBarActivity {
 		}
 
 		private void playAudio() {
-			mReversPlay = new ReversPlay(getFileName());
-			mReversPlay.start();
+//			mReversPlay = new ReversPlay(getFileName());
+//			mReversPlay.start();
+			mPlayer = new Player(getFileName());
+			mPlayer.start();
 		}
 	}
 }

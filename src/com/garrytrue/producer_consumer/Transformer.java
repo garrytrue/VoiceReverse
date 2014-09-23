@@ -4,7 +4,7 @@ import java.util.concurrent.BlockingQueue;
 
 import android.util.Log;
 
-public class Tramsformer {
+public class Transformer {
 	private final static String TAG = "Transformer";
 	private ITransform mTransform;
 	private BlockingQueue<Buffer> mInputQueue;
@@ -14,7 +14,7 @@ public class Tramsformer {
 	private boolean last;
 	private boolean mustStop = false;
 
-	public Tramsformer(ITransform t, BlockingQueue<Buffer> input,
+	public Transformer(ITransform t, BlockingQueue<Buffer> input,
 			BlockingQueue<Buffer> output) {
 		mTransform = t;
 		mInputQueue = input;
@@ -22,6 +22,7 @@ public class Tramsformer {
 	}
 
 	void start() {
+		Log.i(TAG, "start");
 		mThread = new Thread(new Runnable() {
 
 			@Override
@@ -29,7 +30,7 @@ public class Tramsformer {
 				doRun();
 
 			}
-		});
+		}, "transformer");
 		mThread.start();
 	}
 
@@ -58,6 +59,7 @@ public class Tramsformer {
 	}
 
 	void stop() throws InterruptedException {
+		Log.i(TAG, "stop");
 		mustStop = true;
 		mThread.join();
 

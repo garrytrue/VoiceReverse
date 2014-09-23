@@ -24,7 +24,7 @@ class Producer {
 			public void run() {
 				doRun();
 			}
-		});
+		},"producer");
 		mThread.start();
 	}
 

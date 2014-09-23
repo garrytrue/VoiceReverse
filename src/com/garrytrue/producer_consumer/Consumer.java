@@ -22,7 +22,7 @@ class Consumer {
 			public void run() {
 				doRun();
 			}
-		});
+		},"consumer");
 		mThread.start();
 	}
 
