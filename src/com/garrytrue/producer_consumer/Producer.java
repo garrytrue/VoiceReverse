@@ -18,7 +18,7 @@ class Producer {
 		mBufferQueue = b;
 	}
 
-	void start(){
+	void start() {
 		mThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -28,33 +28,31 @@ class Producer {
 		mThread.start();
 	}
 
-	void stop() throws InterruptedException{
-		
-			mustStop = true;
-			mThread.join();
-		}
+	void stop() throws InterruptedException {
+
+		mustStop = true;
+		mThread.join();
+	}
+
 	private void doRun() {
 		Log.i(TAG, "Producer Start");
 		mProducer.onStart();
-		try{
-			while(true){
+		try {
+			while (true) {
 				Buffer b = new Buffer(defCap);
 				boolean readMore = mProducer.produce(b);
 				boolean last = !readMore || mustStop;
 				b.last = last;
-				Log.i(TAG, "sending buffer: "+b);
+				Log.i(TAG, "sending buffer: " + b);
 				mBufferQueue.put(b);
-				if(last) {
+				if (last) {
 					break;
 				}
 			}
-
-		}catch(InterruptedException ex){
+		} catch (InterruptedException ex) {
 			ex.printStackTrace();
 		}
 		Log.i(TAG, "exit");
 		mProducer.onStop();
 	}
-
-
 }

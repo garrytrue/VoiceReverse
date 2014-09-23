@@ -21,7 +21,6 @@ public class ProduceConsumeChain {
 	public void stop() throws InterruptedException{
 		mProducer.stop();
 		mConsumer.stop();
-		
 	}
 
 }
