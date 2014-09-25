@@ -1,9 +1,8 @@
 package com.garrytrue.producer_consumer;
 
-
-public interface IProducer{
+public interface IBufferHandler {
 	void onStart();
-	boolean produce(Buffer b);
+	boolean handle(Buffer b);
 	void onStop();
 
 }

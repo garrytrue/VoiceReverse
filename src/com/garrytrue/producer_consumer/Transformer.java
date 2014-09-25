@@ -11,7 +11,6 @@ public class Transformer {
 	private BlockingQueue<Buffer> mOutputQueue;
 	private Thread mThread;
 	private boolean isTransformed;
-	private boolean last;
 	private boolean mustStop = false;
 
 	public Transformer(ITransform t, BlockingQueue<Buffer> input,
@@ -40,8 +39,8 @@ public class Transformer {
 		while (true) {
 			try {
 				Buffer buffer = mInputQueue.take();
-				last = buffer.last;
-				isTransformed = mTransform.transform(buffer);
+				boolean last = buffer.last;
+				boolean isTransformed = mTransform.transform(buffer);
 				mOutputQueue.put(buffer);
 				Log.i(TAG, "Transformered buffer " + buffer);
 				if (!isTransformed || mustStop) {

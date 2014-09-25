@@ -8,7 +8,8 @@ import com.garrytrue.producer_consumer.ITransform;
 public class TransformMultiply implements ITransform {
 	private static final String TAG = "TransformerMultiply";
 	
-	private static final float MULTIPLEXER  = 1.5f; 
+//	private static final float MULTIPLEXER  = 1.5f;
+	private static final short INCEMENTAL = 20000;
 
 	@Override
 	public void onStart() {
@@ -23,8 +24,9 @@ public class TransformMultiply implements ITransform {
 		if(b.buffer.length == 0) return false;
 		for (int i = 0; i < b.buffer.length; i++) {
 			short tmp = b.buffer[i];
+//			with Log tread sooooo sloy
 //			Log.i(TAG, "Before multiply "+ tmp);
-			tmp = (short) (tmp*MULTIPLEXER);
+			tmp = (short) (tmp+INCEMENTAL);
 //			Log.i(TAG, "After multiply " + tmp);
 			b.buffer[i] = tmp;
 		}

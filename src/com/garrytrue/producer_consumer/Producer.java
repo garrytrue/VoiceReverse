@@ -13,7 +13,6 @@ class Producer {
 	private boolean mustStop = false;
 
 	public Producer(IProducer mIProducer, BlockingQueue<Buffer> b) {
-		// TODO Auto-generated constructor stub
 		mProducer = mIProducer;
 		mBufferQueue = b;
 	}
@@ -29,7 +28,6 @@ class Producer {
 	}
 
 	void stop() throws InterruptedException {
-
 		mustStop = true;
 		mThread.join();
 	}
