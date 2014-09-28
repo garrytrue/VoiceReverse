@@ -10,7 +10,6 @@ public class Transformer {
 	private BlockingQueue<Buffer> mInputQueue;
 	private BlockingQueue<Buffer> mOutputQueue;
 	private Thread mThread;
-	private boolean isTransformed;
 	private boolean mustStop = false;
 
 	public Transformer(ITransform t, BlockingQueue<Buffer> input,

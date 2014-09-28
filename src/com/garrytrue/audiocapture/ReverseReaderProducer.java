@@ -11,14 +11,14 @@ import android.util.Log;
 import com.garrytrue.producer_consumer.Buffer;
 import com.garrytrue.producer_consumer.IProducer;
 
-public class ReverseReader implements IProducer {
+public class ReverseReaderProducer implements IProducer {
 	private final static String TAG = "ReverseReader";
 	private String mFileName;
 	private RandomAccessFile mFile;
 	private byte[] mInternalBuff;
 	private long mCurPos;
 
-	public ReverseReader(String name) {
+	public ReverseReaderProducer(String name) {
 		mFileName = name;
 
 	}

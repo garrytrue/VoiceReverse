@@ -24,7 +24,7 @@ public class TransformMultiply implements ITransform {
 		if(b.buffer.length == 0) return false;
 		for (int i = 0; i < b.buffer.length; i++) {
 			short tmp = b.buffer[i];
-//			with Log tread sooooo sloy
+//			with Log tread sooooo slow
 //			Log.i(TAG, "Before multiply "+ tmp);
 			tmp = (short) (tmp+INCEMENTAL);
 //			Log.i(TAG, "After multiply " + tmp);
